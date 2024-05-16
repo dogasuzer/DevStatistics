@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum QuestionType {
+  YES_NO 
+  SCALE
+}
+
+enum RoleType {
+  DEVELOPER
+  HR
+  PROJECT_MANAGER
+  PRODUCT_MANAGER
+  IT_SPECIALIST
+  OTHER
+}
+
+model Question{
+  id        Int       @id @default(autoincrement())
+  text      String
+  type      QuestionType
+  average       Float?    @default(0)       // Relevant for SCALE questions
+  yesPercentage Float?    @default(50)       // Relevant for YES_NO questions
+  noPercentage Float?    @default(50)       // Relevant for YES_NO questions
+  answers   Answer[]
+}
+
+model Answer {
+  id         Int       @id @default(autoincrement())
+  value      Int       @default(1) // See comments
+  questionId Int
+  question   Question  @relation(fields: [questionId], references: [id])
+  createdAt  DateTime  @default(now())
+  role       RoleType 
+}
+
+// For YES_NO questions:
+// 0 is interpreted as "No", 1 as "Yes"
+// For SCALE questions:
+// Values from 1 to 10 as the respective scale value
+
+
